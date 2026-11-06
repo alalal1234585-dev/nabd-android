@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#2fa58c">
+<link rel="manifest" href="manifest.json">
+<title>نبض</title>
+<style>
+  :root{
+    --bg:#e9f6f2; --glass:rgba(255,255,255,.62); --line:rgba(40,120,105,.14);
+    --txt:#1f3b36; --dim:#7a948e; --mint:#8fd9c6; --mint-d:#2fa58c;
+    --work:#2fa58c; --life:#8a6fd1; --late:#e0584b; --late-soft:#fbe3df;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:linear-gradient(160deg,#f3fbf8,#d9f0e8);color:var(--txt);
+    font-family:"Segoe UI",Tahoma,sans-serif;overflow:hidden}
+  .app{height:100%;display:flex;flex-direction:column;padding:18px;gap:14px;max-width:980px;margin:auto}
+
+  /* الرأس */
+  header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  .title{font-size:20px;font-weight:700;color:var(--mint-d)}
+  .title small{display:block;font-size:12px;font-weight:400;color:var(--dim);margin-top:2px}
+  .seg{display:flex;background:var(--glass);border:1px solid var(--line);border-radius:99px;padding:3px;
+    backdrop-filter:blur(8px)}
+  .seg button{border:0;background:none;color:var(--dim);padding:6px 14px;border-radius:99px;cursor:pointer;font-size:13px}
+  .seg button.on{background:var(--mint-d);color:#fff}
+
+  /* اللوحة: قائمة المهام يسار، والأولويات والملاحظات يمين */
+  .board{flex:1;min-height:0;display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+  .panel{background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:16px 18px;
+    backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(31,59,54,.07);min-height:0;display:flex;flex-direction:column}
+  .panel h2{margin:0 0 10px;font-size:15px;color:var(--mint-d);font-weight:700;display:flex;justify-content:space-between;align-items:center}
+  .panel h2 span{font-size:12px;color:var(--dim);font-weight:400}
+  .list{list-style:none;margin:0;padding:0;overflow:auto;flex:1;min-height:0}
+  .right{display:flex;flex-direction:column;gap:14px;min-height:0}
+  .right .prio{flex:1}
+  .right .notes{flex:1.2}
+
+  /* صف مثل الخانات في الصورة: شريط ملون يمين وخط سفلي */
+  .row{display:flex;align-items:center;gap:10px;padding:11px 8px;border-bottom:1px dashed var(--line);cursor:pointer;
+    border-radius:10px;transition:background .2s}
+  .row:hover{background:rgba(255,255,255,.7)}
+  .row .tab{width:4px;align-self:stretch;border-radius:4px;background:var(--c,var(--work))}
+  .row .check{width:18px;height:18px;border:2px solid var(--c,var(--work));border-radius:6px;flex:none;cursor:pointer}
+  .row .txt{flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row .when{font-size:12px;color:var(--dim);flex:none;font-variant-numeric:tabular-nums}
+  .row.late{background:var(--late-soft)}
+  .row.late .when{color:var(--late);font-weight:700}
+  .row.late .tab{background:var(--late);animation:pulse 2s ease-in-out infinite}
+  .row.done .txt{text-decoration:line-through;color:var(--dim)}
+  .row.done .check{background:var(--c,var(--work));}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  /* الملاحظات: بطاقات ملونة ناعمة بدل الملصقات العشوائية */
+  .note{background:linear-gradient(180deg,#fffdf6,#f4fbf8);border:1px solid var(--line);border-radius:14px;
+    padding:12px 14px;margin-bottom:10px;cursor:pointer;font-size:14px;border-inline-start:4px solid var(--c)}
+  .note .m{font-size:11px;color:var(--dim);margin-top:6px}
+  .empty{color:var(--dim);font-size:13px;text-align:center;padding:24px 0}
+
+  /* شريط الإدخال */
+  .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--glass);border:1px solid var(--line);
+    border-radius:18px;padding:10px;backdrop-filter:blur(10px)}
+  .bar input[type=text],#text{flex:1;min-width:160px;border:0;background:transparent;font-size:15px;color:var(--txt);
+    outline:none;padding:8px 6px}
+  select,input[type=number],input[type=datetime-local]{background:#fff;border:1px solid var(--line);color:var(--txt);
+    padding:8px 10px;border-radius:12px;font-size:13px;color-scheme:light}
+  #add{background:var(--mint-d);color:#fff;border:0;border-radius:12px;padding:9px 16px;cursor:pointer;font-weight:600}
+  #mic{background:#fff;border:1px solid var(--line);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:16px}
+  #mic.live{background:var(--late);color:#fff;border-color:var(--late)}
+
+  /* البطاقة والمحرر */
+  #detail{position:fixed;inset:0;background:rgba(31,59,54,.25);display:none;align-items:center;justify-content:center;z-index:9;backdrop-filter:blur(3px)}
+  #detail.open{display:flex}
+  .card{background:#fffefb;border:1px solid var(--line);border-radius:20px;padding:22px;width:min(380px,92%);
+    box-shadow:0 20px 50px rgba(31,59,54,.2)}
+  .card h3{margin:0 0 6px;font-size:17px}
+  .card p{color:var(--dim);font-size:13px;margin:4px 0 14px}
+  .card .row{border:0;padding:0;cursor:default;background:none;flex-wrap:wrap;margin-bottom:6px}
+  .card .row:hover{background:none}
+  .card button{background:#fff;border:1px solid var(--line);color:var(--txt);padding:8px 12px;border-radius:10px;cursor:pointer;font-size:13px}
+  .card button.primary{background:var(--mint-d);color:#fff;border:0}
+  .card .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+  .toast{position:fixed;top:16px;inset-inline:50%;transform:translateX(50%);background:#fffefb;border:1px solid var(--line);
+    padding:10px 16px;border-radius:12px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;
+    box-shadow:0 10px 30px rgba(31,59,54,.15)}
+  .toast.show{opacity:1}
+
+  .row.soon{background:#fff6e0}
+  .row.soon .tab{background:#e0a030}
+  .row.soon .when{color:#b7791f;font-weight:600}
+
+  /* الرف: أعمدة حسب نوع التذكير، وكل مهمة خانة مثل بطاقات الصورة */
+  #rack{display:none;flex:1;min-height:0;gap:12px;grid-template-columns:repeat(5,minmax(150px,1fr));overflow:auto;padding:4px}
+  .rcol{--k:#8c8c88;background:#f0f0ee;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;border:1px solid var(--line);border-top:3px solid var(--k)}
+  .rcol.k-minutes{--k:#6f7d86;background:#e7eaec}
+  .rcol.k-hours{--k:#8a7d68;background:#eeebe5}
+  .rcol.k-days{--k:#6d8270;background:#e8ede9}
+  .rcol.k-date{--k:#7b7c8e;background:#ebebf0}
+  .rcol h3{margin:0 2px 4px;font-size:13px;display:flex;justify-content:space-between;align-items:center;color:var(--k)}
+  .rcol h3 span{background:#fff;border-radius:99px;padding:0 8px;font-size:11px;color:var(--dim)}
+  .slot{background:#fff;border-radius:8px;padding:10px 12px 10px 14px;box-shadow:0 2px 6px rgba(31,59,54,.08);
+    cursor:pointer;position:relative;border:1px solid var(--line);min-height:64px;overflow:hidden}
+  .slot::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px;background:var(--c,var(--k))}
+  .slot .st{font-size:13px;font-weight:600}
+  .slot .sm{font-size:11px;color:var(--dim);margin-top:4px}
+  .slot .pb{height:4px;background:#eef3f1;border-radius:4px;margin-top:8px;overflow:hidden}
+  .slot .pb i{display:block;height:100%;width:var(--p);background:var(--c,var(--k))}
+  .slot.soon{--c:#e0a030;background:#fff8e6;animation:glow 3s ease-in-out infinite}
+  .slot.late{--c:var(--late);background:var(--late-soft);animation:pulse 1.6s ease-in-out infinite}
+  .slot.done{opacity:.45}
+  .slot.done .st{text-decoration:line-through}
+  @keyframes glow{0%,100%{box-shadow:0 2px 6px rgba(31,59,54,.08)}50%{box-shadow:0 0 0 3px rgba(224,160,48,.25)}}
+
+  .authbtn{background:var(--glass);border:1px solid var(--line);color:var(--dim);padding:6px 12px;
+    border-radius:99px;cursor:pointer;font-size:12px}
+  .authbtn.in{color:var(--mint-d);border-color:var(--mint-d)}
+
+  @media (max-width:700px){
+    #rack{grid-template-columns:repeat(5,170px)}
+    .board{grid-template-columns:1fr}
+    html,body{overflow:auto}
+    .app{height:auto;min-height:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="title">نبض <small id="today"></small></div>
+    <button id="auth" class="authbtn">دخول بـ Google</button>
+    <div class="seg" id="views">
+      <button data-v="board" class="on">اللوحة</button>
+      <button data-v="rack">الرف</button>
+    </div>
+    <div class="seg" id="filters">
+      <button data-f="all" class="on">الكل</button>
+      <button data-f="work">دوام</button>
+      <button data-f="life">خاص</button>
+    </div>
+  </header>
+
+  <main class="board">
+    <section class="panel">
+      <h2>قائمة المهام <span id="count"></span></h2>
+      <ul class="list" id="todo"></ul>
+    </section>
+    <div class="right">
+      <section class="panel prio">
+        <h2>الأولويات <span>متأخر أو قريب</span></h2>
+        <ul class="list" id="prio"></ul>
+      </section>
+      <section class="panel notes">
+        <h2>ملاحظات <span>بدون موعد</span></h2>
+        <div class="list" id="notes"></div>
+      </section>
+    </div>
+  </main>
+
+  <section id="rack"></section>
+
+  <form class="bar" id="form">
+    <button type="button" id="mic" title="إدخال صوتي">🎙</button>
+    <input type="text" id="text" placeholder="اكتب الشغلة..." autocomplete="off">
+    <select id="cat">
+      <option value="work">دوام</option>
+      <option value="life">خاص</option>
+    </select>
+    <select id="rmode">
+      <option value="none">بدون تذكير</option>
+      <option value="minutes">بعد دقايق</option>
+      <option value="hours">بعد ساعات</option>
+      <option value="days">بعد أيام</option>
+      <option value="date">بتاريخ ووقت</option>
+    </select>
+    <input id="rval" type="number" min="1" value="3" style="display:none;width:70px">
+    <input id="rdate" type="datetime-local" style="display:none">
+    <button id="add" type="submit">إضافة</button>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="detail"><div class="card" id="card"></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging-compat.js"></script>
+<script>
+/* ---------- التخزين ----------
+   الحالي: محلي على المتصفح. للمزامنة مع حسابك، استبدل load/save بخدمة سحابية. */
+const KEY = "nabd.tasks.v1";
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+function saveLocal() { const s = JSON.stringify(tasks); localStorage.setItem(KEY, s); if (window.Android) Android.saveTasks(s); }
+
+/* يحفظ محلياً، وإذا كنت مسجلاً يرسل التغييرات بس للسحابة */
+function save(list) {
+  tasks = list;
+  saveLocal();
+  if (!uid) return;
+  const ref = db.collection("users").doc(uid).collection("tasks");
+  const ids = new Set(list.map(t => t.id));
+  for (const t of list) {
+    const s = JSON.stringify(t);
+    if (lastSynced.get(t.id) !== s) {
+      lastSynced.set(t.id, s);
+      ref.doc(t.id).set(t).catch(() => toast("فشل الحفظ على السحابة"));
+    }
+  }
+  for (const id of [...lastSynced.keys()]) {
+    if (!ids.has(id)) { lastSynced.delete(id); ref.doc(id).delete().catch(() => {}); }
+  }
+}
+let tasks = load();
+let filter = "all";
+let view = "board";
+
+/* ---------- الوقت والتذكير ---------- */
+const DAY = 864e5, HOUR = 36e5, MIN = 6e4;
+const WORK_START = 7, WORK_END = 15;
+const inWorkHours = (d = new Date()) => d.getHours() >= WORK_START && d.getHours() < WORK_END;
+const ageDays = (t) => (Date.now() - t.created) / DAY;
+const dueAt = (t) => t.remindAt ?? (t.remindDays ? t.created + t.remindDays * DAY : null);
+const isLate = (t) => { const d = dueAt(t); return d !== null && !t.done && Date.now() >= d; };
+const isSoon = (t) => { const d = dueAt(t); return d !== null && !t.done && d - Date.now() < DAY; };
+/* تنبيه الاقتراب: يبدأ عند ٨٠٪ من المدة، ويغيّر لون المهمة */
+const warnAt = (t) => { const d = dueAt(t); return d === null ? null : t.created + (d - t.created) * 0.8; };
+const isApproaching = (t) => { const w = warnAt(t); return w !== null && !t.done && !isLate(t) && Date.now() >= w; };
+
+function remainLabel(t) {
+  if (t.done) return "✓";
+  const d = dueAt(t);
+  if (d === null) return "—";
+  const diff = d - Date.now();
+  if (diff <= 0) return "متأخر";
+  if (diff < HOUR) return Math.ceil(diff / MIN) + " د";
+  if (diff < DAY) return Math.ceil(diff / HOUR) + " س";
+  return Math.ceil(diff / DAY) + " يوم";
+}
+const escapeHtml = (s) => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const catColor = (t) => t.cat === "work" ? "var(--work)" : "var(--life)";
+const visible = () => tasks.filter(t => filter === "all" || t.cat === filter);
+
+/* ---------- العرض ---------- */
+function rowHTML(t) {
+  const late = isLate(t);
+  return `<li class="row ${late ? "late" : isApproaching(t) ? "soon" : ""} ${t.done ? "done" : ""}" data-id="${t.id}" style="--c:${catColor(t)}">
+    <span class="tab"></span>
+    <span class="check" data-check="1"></span>
+    <span class="txt">${escapeHtml(t.text)}</span>
+    <span class="when">${remainLabel(t)}</span>
+  </li>`;
+}
+
+function render() {
+  const all = visible();
+  const active = all.filter(t => !t.done);
+  const byUrgency = (a, b) => {
+    const la = isLate(a), lb = isLate(b);
+    if (la !== lb) return la ? -1 : 1;
+    const da = dueAt(a) ?? Infinity, db = dueAt(b) ?? Infinity;
+    return da - db || a.created - b.created;
+  };
+
+  // قائمة المهام: النشطة مرتبة حسب الاستعجال، والمنجزة في الأسفل
+  const done = all.filter(t => t.done).slice(-4);
+  const todo = [...active].sort(byUrgency);
+  document.getElementById("count").textContent = active.length ? `${active.length} نشطة` : "";
+  document.getElementById("todo").innerHTML =
+    (todo.length || done.length) ? [...todo, ...done].map(rowHTML).join("") : `<div class="empty">القائمة فاضية</div>`;
+
+  // الأولويات: المتأخرة والقريبة
+  const prio = active.filter(t => isLate(t) || isSoon(t)).sort(byUrgency).slice(0, 5);
+  document.getElementById("prio").innerHTML =
+    prio.length ? prio.map(rowHTML).join("") : `<div class="empty">ما فيه شي عاجل ✨</div>`;
+
+  // الملاحظات: الأشياء بدون موعد
+  const notes = active.filter(t => dueAt(t) === null).sort((a, b) => b.created - a.created);
+  document.getElementById("notes").innerHTML = notes.length
+    ? notes.map(t => `<div class="note" data-id="${t.id}" style="--c:${catColor(t)}">
+        ${escapeHtml(t.text)}
+        <div class="m">${t.cat === "work" ? "دوام" : "خاص"} · قبل ${Math.floor(ageDays(t))} يوم</div>
+      </div>`).join("")
+    : `<div class="empty">لا توجد ملاحظات</div>`;
+  renderRack();
+}
+
+/* الضغط على أي عنصر: الدائرة تنجز، والباقي يفتح البطاقة */
+document.getElementById("todo").addEventListener("click", onItemClick);
+document.getElementById("prio").addEventListener("click", onItemClick);
+document.getElementById("notes").addEventListener("click", onItemClick);
+function onItemClick(e) {
+  const el = e.target.closest("[data-id]"); if (!el) return;
+  const t = tasks.find(x => x.id === el.dataset.id); if (!t) return;
+  if (e.target.dataset.check) { t.done = !t.done; save(tasks); render(); return; }
+  openCard(t.id);
+}
+
+/* ---------- الرف ---------- */
+const KINDS = [["minutes", "الدقايق"], ["hours", "الساعات"], ["days", "الأيام"], ["date", "بتاريخ"], ["none", "بدون موعد"]];
+const kindOf = (t) => {
+  const d = dueAt(t);
+  if (d === null) return "none";
+  if (t.kind && t.kind !== "none") return t.kind;
+  const w = d - t.created;
+  return w < HOUR ? "minutes" : w < DAY ? "hours" : "days";
+};
+const progressOf = (t) => {
+  const d = dueAt(t); if (d === null) return 0;
+  return Math.min(1, Math.max(0, (Date.now() - t.created) / (d - t.created)));
+};
+function renderRack() {
+  if (view !== "rack") return;
+  const all = visible();
+  document.getElementById("rack").innerHTML = KINDS.map(([k, label]) => {
+    const items = all.filter(t => kindOf(t) === k)
+      .sort((a, b) => (dueAt(a) ?? Infinity) - (dueAt(b) ?? Infinity));
+    const slots = items.map(t => {
+      const st = t.done ? "done" : isLate(t) ? "late" : isApproaching(t) ? "soon" : "";
+      return `<div class="slot ${t.cat} ${st}" data-id="${t.id}" style="--p:${(progressOf(t) * 100).toFixed(0)}%">
+        <div class="st">${escapeHtml(t.text)}</div>
+        <div class="sm">${remainLabel(t)} · ${t.cat === "work" ? "دوام" : "خاص"}</div>
+        <div class="pb"><i></i></div>
+      </div>`;
+    }).join("");
+    return `<div class="rcol k-${k}"><h3>${label}<span>${items.length}</span></h3>${slots || `<div class="empty">فاضي</div>`}</div>`;
+  }).join("");
+}
+document.getElementById("rack").addEventListener("click", (e) => {
+  const el = e.target.closest("[data-id]"); if (el) openCard(el.dataset.id);
+});
+document.querySelectorAll("#views button").forEach(b => b.addEventListener("click", () => {
+  view = b.dataset.v;
+  document.querySelectorAll("#views button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelector(".board").style.display = view === "board" ? "grid" : "none";
+  document.getElementById("rack").style.display = view === "rack" ? "grid" : "none";
+  render();
+}));
+
+/* ---------- الفلاتر ---------- */
+document.querySelectorAll("#filters button").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.f;
+  document.querySelectorAll("#filters button").forEach(x => x.classList.toggle("on", x === b));
+  render();
+}));
+
+/* ---------- البطاقة ---------- */
+function openCard(id) {
+  const t = tasks.find(x => x.id === id); if (!t) return;
+  const card = document.getElementById("card");
+  const d = dueAt(t);
+  card.innerHTML = `
+    <h3>${escapeHtml(t.text)}</h3>
+    <p>${t.cat === "work" ? "دوام" : "خاص"} · قبل ${Math.floor(ageDays(t))} يوم
+      ${d ? " · تذكير: " + new Date(d).toLocaleString("ar-SA", { dateStyle: "medium", timeStyle: "short" }) : ""}</p>
+    <div class="btns">
+      <button class="primary" data-a="done">${t.done ? "رجّعها" : "تمت ✓"}</button>
+      <button data-a="snooze" data-h="1">أجّل ساعة</button>
+      <button data-a="snooze" data-h="24">أجّل يوم</button>
+      <button data-a="edit">عدّل التذكير</button>
+      <button data-a="del">حذف</button>
+      <button data-a="close">إغلاق</button>
+    </div>`;
+  card.onclick = (e) => {
+    const a = e.target.dataset.a; if (!a) return;
+    if (a === "close") return closeCard();
+    if (a === "edit") return showEditor(id);
+    if (a === "done") t.done = !t.done;
+    if (a === "snooze") {
+      t.remindAt = Math.max(Date.now(), dueAt(t) ?? Date.now()) + Number(e.target.dataset.h) * HOUR;
+      t.remindDays = 0; t.notified = false; t.warned = false;
+    }
+    if (a === "del") tasks = tasks.filter(x => x.id !== id);
+    save(tasks); render(); closeCard();
+  };
+  document.getElementById("detail").classList.add("open");
+}
+
+function showEditor(id) {
+  const t = tasks.find(x => x.id === id); if (!t) return;
+  const card = document.getElementById("card");
+  card.innerHTML = `
+    <h3>عدّل التذكير</h3>
+    <p>${escapeHtml(t.text)}</p>
+    <div class="btns">
+      <select id="em">
+        <option value="none">بدون تذكير</option>
+        <option value="minutes">بعد دقايق</option>
+        <option value="hours">بعد ساعات</option>
+        <option value="days">بعد أيام</option>
+        <option value="date">بتاريخ ووقت</option>
+      </select>
+      <input id="ev" type="number" min="1" value="30" style="width:80px">
+      <input id="ed" type="datetime-local" style="display:none">
+    </div>
+    <div class="btns">
+      <button class="primary" data-a="saveRem">حفظ</button>
+      <button data-a="cancelRem">رجوع</button>
+    </div>`;
+  const em = card.querySelector("#em"), ev = card.querySelector("#ev"), ed = card.querySelector("#ed");
+  const sync = () => {
+    ev.style.display = (em.value === "date" || em.value === "none") ? "none" : "";
+    ed.style.display = em.value === "date" ? "" : "none";
+  };
+  em.addEventListener("change", sync); sync();
+  card.onclick = (e) => {
+    const a = e.target.dataset.a; if (!a) return;
+    if (a === "cancelRem") return openCard(id);
+    if (a === "saveRem") {
+      const m = em.value, v = Number(ev.value), dv = ed.value, now = Date.now();
+      let r = null;
+      if (m === "minutes" && v > 0) r = now + v * MIN;
+      if (m === "hours" && v > 0) r = now + v * HOUR;
+      if (m === "days" && v > 0) r = now + v * DAY;
+      if (m === "date" && dv) r = new Date(dv).getTime();
+      t.remindAt = r; t.kind = m; t.remindDays = 0; t.notified = false; t.warned = false;
+      save(tasks); render(); openCard(id);
+    }
+  };
+}
+const closeCard = () => document.getElementById("detail").classList.remove("open");
+document.getElementById("detail").addEventListener("click", (e) => { if (e.target.id === "detail") closeCard(); });
+
+/* ---------- الإضافة ---------- */
+const rmode = document.getElementById("rmode"), rval = document.getElementById("rval"), rdate = document.getElementById("rdate");
+function syncRemindFields() {
+  const m = rmode.value;
+  rval.style.display = (m === "days" || m === "hours" || m === "minutes") ? "" : "none";
+  rdate.style.display = m === "date" ? "" : "none";
+  const defaults = { days: 3, hours: 3, minutes: 30 };
+  if (defaults[m]) rval.value = defaults[m];
+}
+rmode.addEventListener("change", syncRemindFields);
+syncRemindFields();
+
+document.getElementById("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const textEl = document.getElementById("text");
+  const text = textEl.value.trim(); if (!text) return;
+  const now = Date.now(), val = Number(rval.value), mode = rmode.value;
+  let remindAt = null;
+  if (mode === "minutes" && val > 0) remindAt = now + val * MIN;
+  if (mode === "hours" && val > 0) remindAt = now + val * HOUR;
+  if (mode === "days" && val > 0) remindAt = now + val * DAY;
+  if (mode === "date" && rdate.value) remindAt = new Date(rdate.value).getTime();
+  tasks.push({
+    id: crypto.randomUUID ? crypto.randomUUID() : String(now + Math.random()),
+    text, cat: document.getElementById("cat").value, remindAt, kind: mode, created: now, done: false, warned: false
+  });
+  save(tasks);
+  textEl.value = "";
+  render();
+});
+
+/* ---------- الإدخال الصوتي ---------- */
+(() => {
+  const mic = document.getElementById("mic");
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { mic.style.display = "none"; return; }
+  const rec = new SR();
+  rec.lang = "ar-SA"; rec.interimResults = false; rec.maxAlternatives = 1;
+  rec.onresult = (e) => { document.getElementById("text").value = e.results[0][0].transcript; };
+  rec.onerror = () => toast("ما قدرت أسمعك، جرب مرة ثانية");
+  rec.onend = () => mic.classList.remove("live");
+  mic.addEventListener("click", () => {
+    mic.classList.add("live");
+    try { rec.start(); toast("تكلم الحين..."); } catch { rec.stop(); }
+  });
+})();
+
+/* ---------- التذكيرات ---------- */
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 4000);
+}
+/* تنبيهان لكل مهمة: اقتراب الموعد، ثم انتهاؤه. تذكيرات الدوام داخل ساعات الدوام فقط */
+function checkReminders() {
+  // الحسابات المسجلة: السيرفر هو اللي يرسل التنبيه، فالصفحة ما تغيّر الحالة
+  if (uid) return;
+  for (const t of tasks) {
+    if (t.done) continue;
+    if (t.cat === "work" && !inWorkHours()) continue;
+    if (isLate(t) && !t.notified) {
+      t.notified = true; t.warned = true;
+      notify(`انتهى وقت: ${t.text}`, t.text);
+    } else if (!t.warned && isApproaching(t)) {
+      t.warned = true;
+      notify(`اقترب موعد: ${t.text}`, t.text);
+    }
+  }
+  save(tasks); render();
+}
+function notify(title, body) {
+  toast(title);
+  // إذا المستخدم مسجل، السيرفر يرسل الإشعار، فنتجنب التكرار
+  if (window.Android && Android.showNotice) Android.showNotice(title, body);
+  else if (!uid && "Notification" in window && Notification.permission === "granted") new Notification(title, { body });
+}
+const tickClock = () => {
+  const d = new Date();
+  document.getElementById("today").textContent =
+    d.toLocaleDateString("ar-SA", { weekday: "long", day: "numeric", month: "long" }) +
+    " · " + d.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }) +
+    (inWorkHours(d) ? " · وقت الدوام" : "");
+};
+tickClock(); setInterval(tickClock, 30000);
+if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+setInterval(checkReminders, 30000);
+/* ---------- المزامنة مع حسابك (Firebase) ----------
+   اختيارية: إذا الشبكة حجبت Firebase، التطبيق يشتغل محلياً بدون مزامنة. */
+let auth = null, db = null, messaging = null;
+let uid = null, unsub = null, initialized = false;
+const lastSynced = new Map();
+const authBtn = document.getElementById("auth");
+const VAPID_KEY = "BL0PhJQraS_Z6Fb2hJ3sX6pcjY7qBr3UkabdEukv7R4dxOwlcsW2sqrCBNTqrQNV1vtiiJG9f61mj9QbtKXhDRQ";
+try {
+  if (!window.firebase) throw new Error("firebase غير متاح");
+  firebase.initializeApp({
+    apiKey: "AIzaSyDYOkTNAxxhliKeiIvfio_rsAxIx6fVGxM",
+    authDomain: "nabd-2a693.firebaseapp.com",
+    projectId: "nabd-2a693",
+    storageBucket: "nabd-2a693.firebasestorage.app",
+    messagingSenderId: "657465239586",
+    appId: "1:657465239586:web:42def351c9cef287cd827b"
+  });
+  auth = firebase.auth();
+  db = firebase.firestore();
+  messaging = (firebase.messaging && firebase.messaging.isSupported()) ? firebase.messaging() : null;
+} catch (e) {
+  auth = null; db = null; messaging = null;
+  authBtn.disabled = true;
+  authBtn.textContent = "بدون مزامنة";
+  authBtn.title = "المزامنة غير متاحة على هذه الشبكة";
+}
+
+if (auth) {
+  authBtn.addEventListener("click", () => {
+    if (uid) return auth.signOut();
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+      .catch(() => toast("تعذر تسجيل الدخول"));
+  });
+
+  auth.onAuthStateChanged((user) => {
+    if (unsub) { unsub(); unsub = null; }
+    uid = user ? user.uid : null;
+    initialized = false;
+    lastSynced.clear();
+    authBtn.textContent = user ? `خروج · ${user.displayName || "حسابي"}` : "دخول بـ Google";
+    authBtn.classList.toggle("in", !!user);
+    if (!user) return;
+    enablePush(user);
+
+    unsub = db.collection("users").doc(uid).collection("tasks").onSnapshot((snap) => {
+      const cloud = snap.docs.map(d => d.data());
+      if (!initialized && !cloud.length && tasks.length) { initialized = true; save(tasks); return; }
+      initialized = true;
+      cloud.forEach(t => lastSynced.set(t.id, JSON.stringify(t)));
+      tasks = cloud;
+      saveLocal();
+      render();
+    }, () => toast("تعذر المزامنة، تأكد من الاتصال"));
+  });
+}
+
+/* ---------- الإشعارات بالخلفية (FCM) ----------
+   يسجل الجهاز ويحفظ رمز الإشعار في حسابك، والسيرفر يرسل التنبيه حتى والجوال مقفل. */
+
+async function enablePush(user) {
+  if (!messaging || !("Notification" in window) || !("serviceWorker" in navigator)) return;
+  try {
+    if (Notification.permission === "default") await Notification.requestPermission();
+    if (Notification.permission !== "granted") return;
+    // إشعار والصفحة مفتوحة (الإشعارات بالخلفية تتولاها firebase-messaging-sw.js)
+    messaging.onMessage((p) => {
+      const d = p.data || {};
+      toast(d.title || "نبض");
+      if (Notification.permission === "granted") new Notification(d.title || "نبض", { body: d.body || "", dir: "rtl", lang: "ar" });
+    });
+    const reg = await navigator.serviceWorker.register("firebase-messaging-sw.js");
+    const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+    if (token) {
+      await db.collection("users").doc(user.uid).collection("devices").doc(token)
+        .set({ updated: Date.now(), ua: navigator.userAgent.slice(0, 120) });
+    }
+  } catch (e) {
+    toast("تعذر تفعيل الإشعارات");
+  }
+}
+
+checkReminders();
+render();
+</script>
+</body>
+</html>
