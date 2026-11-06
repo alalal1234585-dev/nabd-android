@@ -5,21 +5,150 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="12dp"
-    android:background="#F4FBF8">
+    android:background="@drawable/w_bg">
 
-    <TextView
-        android:id="@+id/w_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#2FA58C"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/w_body"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textColor="#1F3B36"
-        android:textSize="13sp" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="نبض"
+            android:textColor="#2FA58C"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/w_plus"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/w_plus_bg"
+            android:gravity="center"
+            android:text="+"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/w_next_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <FrameLayout
+            android:layout_width="84dp"
+            android:layout_height="wrap_content">
+
+            <Chronometer
+                android:id="@+id/w_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="#1F3B36"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/w_none"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="—"
+                android:textColor="#1F3B36"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/w_next_lbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#5F7A73"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/w_next_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#1F3B36"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <ProgressBar
+                android:id="@+id/w_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:layout_marginTop="6dp"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/w_bar" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/tile_work"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingBottom="6dp"
+            android:paddingTop="6dp">
+            <TextView android:id="@+id/w_work_n" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#2A8A77" android:textSize="20sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="دوام" android:textColor="#2A8A77" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/tile_life"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingBottom="6dp"
+            android:paddingTop="6dp">
+            <TextView android:id="@+id/w_life_n" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#6E54B8" android:textSize="20sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="خاص" android:textColor="#6E54B8" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/tile_late"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingBottom="6dp"
+            android:paddingTop="6dp">
+            <TextView android:id="@+id/w_late_n" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#C0392B" android:textSize="20sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="متأخر" android:textColor="#C0392B" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
