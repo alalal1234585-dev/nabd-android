@@ -88,7 +88,7 @@ class NabdWidget : AppWidgetProvider() {
             }
 
             mgr.updateAppWidget(id, views)
-            mgr.notifyAppWidgetViewDataChanged(id, stacks.values.toIntArray())
+            for (viewId in stacks.values) mgr.notifyAppWidgetViewDataChanged(id, viewId)
         }
     }
 }
