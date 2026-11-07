@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
@@ -29,7 +30,6 @@ class NabdWidget : AppWidgetProvider() {
             val all = (0 until arr.length()).map { arr.getJSONObject(it) }
             val active = all.filter { !it.optBoolean("done") }
 
-            // العدادات الثلاثة
             val work = active.count { it.optString("cat") == "work" }
             val life = active.count { it.optString("cat") != "work" }
             val late = active.count { !it.isNull("remindAt") && it.getLong("remindAt") <= now }
@@ -37,7 +37,6 @@ class NabdWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.w_life_n, life.toString())
             views.setTextViewText(R.id.w_late_n, late.toString())
 
-            // أقرب مهمة موعدها لسه ما صار
             val next = active
                 .filter { !it.isNull("remindAt") && it.getLong("remindAt") > now }
                 .minByOrNull { it.getLong("remindAt") }
@@ -47,7 +46,6 @@ class NabdWidget : AppWidgetProvider() {
                 val created = next.optLong("created", now)
                 val span = (due - created).coerceAtLeast(1L)
                 val pct = (((now - created).toDouble() / span) * 100).toInt().coerceIn(0, 100)
-                // العداد نظام Chronometer: يتحرك لوحده بدون تحديث الـ widget
                 val base = SystemClock.elapsedRealtime() + (due - now)
                 val catLabel = if (next.optString("cat") == "work") "دوام" else "خاص"
                 views.setViewVisibility(R.id.w_count, View.VISIBLE)
@@ -66,14 +64,31 @@ class NabdWidget : AppWidgetProvider() {
                 views.setProgressBar(R.id.w_bar, 100, 0, false)
             }
 
-            // الضغط على الـ widget أو الزر + يفتح التطبيق
             val open = PendingIntent.getActivity(
                 ctx, 0, Intent(ctx, MainActivity::class.java),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
+            val template = PendingIntent.getActivity(
+                ctx, 1, Intent(ctx, MainActivity::class.java),
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
             views.setOnClickPendingIntent(R.id.w_root, open)
             views.setOnClickPendingIntent(R.id.w_plus, open)
+
+            // ثلاث كومات بطاقات: كل واحدة لها مصدر بيانات مختلف
+            val stacks = mapOf("work" to R.id.w_stack_work, "life" to R.id.w_stack_life, "late" to R.id.w_stack_late)
+            val empties = mapOf("work" to R.id.w_empty_work, "life" to R.id.w_empty_life, "late" to R.id.w_empty_late)
+            for ((cat, viewId) in stacks) {
+                val svc = Intent(ctx, StackService::class.java)
+                    .putExtra("cat", cat)
+                    .setData(Uri.parse("nabd://stack/$cat"))
+                views.setRemoteAdapter(viewId, svc)
+                views.setPendingIntentTemplate(viewId, template)
+                views.setEmptyView(viewId, empties.getValue(cat))
+            }
+
             mgr.updateAppWidget(id, views)
+            mgr.notifyAppWidgetViewDataChanged(id, stacks.values.toIntArray())
         }
     }
 }

@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="#1F3B36"
-                android:textSize="22sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -63,7 +63,7 @@
                 android:gravity="center"
                 android:text="—"
                 android:textColor="#1F3B36"
-                android:textSize="22sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
         </FrameLayout>
@@ -86,8 +86,8 @@
                 android:id="@+id/w_next_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
                 android:ellipsize="end"
+                android:maxLines="1"
                 android:textColor="#1F3B36"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -106,49 +106,65 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="10dp"
+        android:layout_weight="1"
         android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/tile_work"
-            android:gravity="center"
             android:orientation="vertical"
-            android:paddingBottom="6dp"
-            android:paddingTop="6dp">
-            <TextView android:id="@+id/w_work_n" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#2A8A77" android:textSize="20sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="دوام" android:textColor="#2A8A77" android:textSize="11sp" android:textStyle="bold" />
+            android:padding="6dp">
+            <TextView android:id="@+id/w_work_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#2A8A77" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="دوام" android:textColor="#2A8A77" android:textSize="11sp" android:textStyle="bold" />
+            <StackView
+                android:id="@+id/w_stack_work"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="4dp" />
+            <TextView android:id="@+id/w_empty_work" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:text="فاضي" android:textColor="#2A8A77" android:textSize="11sp" android:visibility="gone" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="6dp"
             android:layout_weight="1"
             android:background="@drawable/tile_life"
-            android:gravity="center"
             android:orientation="vertical"
-            android:paddingBottom="6dp"
-            android:paddingTop="6dp">
-            <TextView android:id="@+id/w_life_n" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#6E54B8" android:textSize="20sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="خاص" android:textColor="#6E54B8" android:textSize="11sp" android:textStyle="bold" />
+            android:padding="6dp">
+            <TextView android:id="@+id/w_life_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#6E54B8" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="خاص" android:textColor="#6E54B8" android:textSize="11sp" android:textStyle="bold" />
+            <StackView
+                android:id="@+id/w_stack_life"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="4dp" />
+            <TextView android:id="@+id/w_empty_life" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:text="فاضي" android:textColor="#6E54B8" android:textSize="11sp" android:visibility="gone" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="6dp"
             android:layout_weight="1"
             android:background="@drawable/tile_late"
-            android:gravity="center"
             android:orientation="vertical"
-            android:paddingBottom="6dp"
-            android:paddingTop="6dp">
-            <TextView android:id="@+id/w_late_n" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#C0392B" android:textSize="20sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="متأخر" android:textColor="#C0392B" android:textSize="11sp" android:textStyle="bold" />
+            android:padding="6dp">
+            <TextView android:id="@+id/w_late_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#C0392B" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="متأخر" android:textColor="#C0392B" android:textSize="11sp" android:textStyle="bold" />
+            <StackView
+                android:id="@+id/w_stack_late"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="4dp" />
+            <TextView android:id="@+id/w_empty_late" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:text="فاضي" android:textColor="#C0392B" android:textSize="11sp" android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
