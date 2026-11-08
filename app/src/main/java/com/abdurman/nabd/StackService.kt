@@ -20,15 +20,20 @@ class StackFactory(private val ctx: Context, private val kind: String) : RemoteV
 
     // الترتيب دائماً من الأقرب موعداً، وهذا يرجع الترتيب كل ما تحدث البيانات
     override fun onDataSetChanged() {
-        val now = System.currentTimeMillis()
-        val arr = TaskStore.load(ctx)
-        val active = (0 until arr.length()).map { arr.getJSONObject(it) }.filter { !it.optBoolean("done") }
-        val filtered = when (kind) {
-            "late" -> active.filter { !it.isNull("remindAt") && it.optLong("remindAt") <= now }
-            "work" -> active.filter { it.optString("cat") == "work" }
-            else -> active.filter { it.optString("cat") != "work" }
+        try {
+            val now = System.currentTimeMillis()
+            val arr = TaskStore.load(ctx)
+            val active = (0 until arr.length()).map { arr.getJSONObject(it) }.filter { !it.optBoolean("done") }
+            val filtered = when (kind) {
+                "late" -> active.filter { !it.isNull("remindAt") && it.optLong("remindAt") <= now }
+                "work" -> active.filter { it.optString("cat") == "work" }
+                else -> active.filter { it.optString("cat") != "work" }
+            }
+            items = filtered.sortedBy { if (it.isNull("remindAt")) Long.MAX_VALUE else it.optLong("remindAt") }
+        } catch (e: Exception) {
+            Log.e("NabdStack", "data failed for $kind", e)
+            items = emptyList()
         }
-        items = filtered.sortedBy { if (it.isNull("remindAt")) Long.MAX_VALUE else it.optLong("remindAt") }
     }
 
     override fun onDestroy() {}
@@ -58,7 +63,8 @@ class StackFactory(private val ctx: Context, private val kind: String) : RemoteV
         rv.setInt(R.id.c_strip, "setBackgroundColor", color)
     }
 
-    override fun getLoadingView(): RemoteViews? = null
+    override fun getLoadingView(): RemoteViews =
+        RemoteViews(ctx.packageName, R.layout.item_card).apply { setTextViewText(R.id.c_text, "...") }
     override fun getViewTypeCount(): Int = 1
     override fun getItemId(pos: Int): Long = pos.toLong()
     override fun hasStableIds(): Boolean = false
