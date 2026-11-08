@@ -120,7 +120,7 @@
             android:padding="6dp">
             <TextView android:id="@+id/w_work_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#2A8A77" android:textSize="18sp" android:textStyle="bold" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="دوام" android:textColor="#2A8A77" android:textSize="11sp" android:textStyle="bold" />
-            <StackView
+            <ListView
                 android:id="@+id/w_stack_work"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -139,7 +139,7 @@
             android:padding="6dp">
             <TextView android:id="@+id/w_life_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#6E54B8" android:textSize="18sp" android:textStyle="bold" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="خاص" android:textColor="#6E54B8" android:textSize="11sp" android:textStyle="bold" />
-            <StackView
+            <ListView
                 android:id="@+id/w_stack_life"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -158,7 +158,7 @@
             android:padding="6dp">
             <TextView android:id="@+id/w_late_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#C0392B" android:textSize="18sp" android:textStyle="bold" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="متأخر" android:textColor="#C0392B" android:textSize="11sp" android:textStyle="bold" />
-            <StackView
+            <ListView
                 android:id="@+id/w_stack_late"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
