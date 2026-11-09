@@ -121,12 +121,41 @@
             android:padding="6dp">
             <TextView android:id="@+id/w_work_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#2A8A77" android:textSize="18sp" android:textStyle="bold" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="دوام" android:textColor="#2A8A77" android:textSize="11sp" android:textStyle="bold" />
-            <ListView
+            <LinearLayout
                 android:id="@+id/w_stack_work"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="4dp"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/w_row_work_0"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/w_row_work_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/w_row_work_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+            </LinearLayout>
             <TextView android:id="@+id/w_empty_work" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:text="فاضي" android:textColor="#2A8A77" android:textSize="11sp" android:visibility="gone" />
         </LinearLayout>
 
@@ -140,12 +169,41 @@
             android:padding="6dp">
             <TextView android:id="@+id/w_life_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#6E54B8" android:textSize="18sp" android:textStyle="bold" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="خاص" android:textColor="#6E54B8" android:textSize="11sp" android:textStyle="bold" />
-            <ListView
+            <LinearLayout
                 android:id="@+id/w_stack_life"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="4dp"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/w_row_life_0"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/w_row_life_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/w_row_life_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+            </LinearLayout>
             <TextView android:id="@+id/w_empty_life" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:text="فاضي" android:textColor="#6E54B8" android:textSize="11sp" android:visibility="gone" />
         </LinearLayout>
 
@@ -159,12 +217,41 @@
             android:padding="6dp">
             <TextView android:id="@+id/w_late_n" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#C0392B" android:textSize="18sp" android:textStyle="bold" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="متأخر" android:textColor="#C0392B" android:textSize="11sp" android:textStyle="bold" />
-            <ListView
+            <LinearLayout
                 android:id="@+id/w_stack_late"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="4dp"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/w_row_late_0"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/w_row_late_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/w_row_late_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#1F3B36"
+                    android:textSize="12sp" />
+            </LinearLayout>
             <TextView android:id="@+id/w_empty_late" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:text="فاضي" android:textColor="#C0392B" android:textSize="11sp" android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
