@@ -36,6 +36,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info" />
         </receiver>
+        <activity
+            android:name=".DebugActivity"
+            android:exported="false"
+            android:label="مستكشف الأخطاء" />
         <service
             android:name=".StackService"
             android:exported="false"

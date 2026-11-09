@@ -13,6 +13,7 @@ import android.widget.RemoteViews
 
 class NabdWidget : AppWidgetProvider() {
     override fun onUpdate(ctx: Context, mgr: AppWidgetManager, ids: IntArray) {
+        DebugLog.add(ctx, "NabdWidget", "onUpdate ids=${ids.size}")
         for (id in ids) update(ctx, mgr, id)
     }
 
@@ -24,6 +25,14 @@ class NabdWidget : AppWidgetProvider() {
         }
 
         fun update(ctx: Context, mgr: AppWidgetManager, id: Int) {
+            try {
+                doUpdate(ctx, mgr, id)
+            } catch (e: Exception) {
+                DebugLog.add(ctx, "NabdWidget", "update failed", e)
+            }
+        }
+
+        private fun doUpdate(ctx: Context, mgr: AppWidgetManager, id: Int) {
             val views = RemoteViews(ctx.packageName, R.layout.widget_nabd)
             val now = System.currentTimeMillis()
             val arr = TaskStore.load(ctx)
@@ -32,17 +41,18 @@ class NabdWidget : AppWidgetProvider() {
 
             val work = active.count { it.optString("cat") == "work" }
             val life = active.count { it.optString("cat") != "work" }
-            val late = active.count { !it.isNull("remindAt") && it.getLong("remindAt") <= now }
+            val late = active.count { !it.isNull("remindAt") && it.optLong("remindAt") <= now }
+            DebugLog.add(ctx, "NabdWidget", "update work=$work life=$life late=$late total=${all.size}")
             views.setTextViewText(R.id.w_work_n, work.toString())
             views.setTextViewText(R.id.w_life_n, life.toString())
             views.setTextViewText(R.id.w_late_n, late.toString())
 
             val next = active
-                .filter { !it.isNull("remindAt") && it.getLong("remindAt") > now }
-                .minByOrNull { it.getLong("remindAt") }
+                .filter { !it.isNull("remindAt") && it.optLong("remindAt") > now }
+                .minByOrNull { it.optLong("remindAt") }
 
             if (next != null) {
-                val due = next.getLong("remindAt")
+                val due = next.optLong("remindAt")
                 val created = next.optLong("created", now)
                 val span = (due - created).coerceAtLeast(1L)
                 val pct = (((now - created).toDouble() / span) * 100).toInt().coerceIn(0, 100)
@@ -68,14 +78,18 @@ class NabdWidget : AppWidgetProvider() {
                 ctx, 0, Intent(ctx, MainActivity::class.java),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
+            val debug = PendingIntent.getActivity(
+                ctx, 2, Intent(ctx, DebugActivity::class.java),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
             val template = PendingIntent.getActivity(
                 ctx, 1, Intent(ctx, MainActivity::class.java),
                 PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
             views.setOnClickPendingIntent(R.id.w_root, open)
             views.setOnClickPendingIntent(R.id.w_plus, open)
+            views.setOnClickPendingIntent(R.id.w_title, debug)
 
-            // ثلاث كومات بطاقات: كل واحدة لها مصدر بيانات مختلف
             val stacks = mapOf("work" to R.id.w_stack_work, "life" to R.id.w_stack_life, "late" to R.id.w_stack_late)
             val empties = mapOf("work" to R.id.w_empty_work, "life" to R.id.w_empty_life, "late" to R.id.w_empty_late)
             for ((cat, viewId) in stacks) {

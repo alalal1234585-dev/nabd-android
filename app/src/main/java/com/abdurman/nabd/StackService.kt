@@ -2,12 +2,10 @@ package com.abdurman.nabd
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import org.json.JSONObject
 
-// خدمة البطاقات المكدسة: كل نوع له مصدر بيانات خاص (من الـ Intent)
 class StackService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsService.RemoteViewsFactory =
         StackFactory(applicationContext, intent.getStringExtra("cat") ?: "work")
@@ -15,10 +13,12 @@ class StackService : RemoteViewsService() {
 
 class StackFactory(private val ctx: Context, private val kind: String) : RemoteViewsService.RemoteViewsFactory {
     private var items: List<JSONObject> = emptyList()
+    private var firstCallLogged = false
 
-    override fun onCreate() {}
+    override fun onCreate() {
+        DebugLog.add(ctx, "NabdStack", "onCreate $kind")
+    }
 
-    // الترتيب دائماً من الأقرب موعداً، وهذا يرجع الترتيب كل ما تحدث البيانات
     override fun onDataSetChanged() {
         try {
             val now = System.currentTimeMillis()
@@ -30,8 +30,9 @@ class StackFactory(private val ctx: Context, private val kind: String) : RemoteV
                 else -> active.filter { it.optString("cat") != "work" }
             }
             items = filtered.sortedBy { if (it.isNull("remindAt")) Long.MAX_VALUE else it.optLong("remindAt") }
+            DebugLog.add(ctx, "NabdStack", "data $kind count=${items.size}")
         } catch (e: Exception) {
-            Log.e("NabdStack", "data failed for $kind", e)
+            DebugLog.add(ctx, "NabdStack", "data failed $kind", e)
             items = emptyList()
         }
     }
@@ -41,15 +42,24 @@ class StackFactory(private val ctx: Context, private val kind: String) : RemoteV
     override fun getCount(): Int = items.size
 
     override fun getViewAt(pos: Int): RemoteViews {
-        val rv = RemoteViews(ctx.packageName, R.layout.item_card)
-        if (pos < 0 || pos >= items.size) return rv
-        try {
-            fillCard(rv, items[pos])
-        } catch (e: Exception) {
-            Log.e("NabdStack", "card failed for $kind at $pos", e)
-            rv.setTextViewText(R.id.c_text, "خطأ في عرض المهمة")
+        if (!firstCallLogged) {
+            firstCallLogged = true
+            DebugLog.add(ctx, "NabdStack", "getViewAt first call $kind pos=$pos")
         }
-        return rv
+        return try {
+            val rv = RemoteViews(ctx.packageName, R.layout.item_card)
+            if (pos < 0 || pos >= items.size) return rv
+            try {
+                fillCard(rv, items[pos])
+            } catch (e: Exception) {
+                DebugLog.add(ctx, "NabdStack", "card failed $kind pos=$pos", e)
+                rv.setTextViewText(R.id.c_text, "خطأ في عرض المهمة")
+            }
+            rv
+        } catch (e: Exception) {
+            DebugLog.add(ctx, "NabdStack", "getViewAt crashed $kind pos=$pos", e)
+            RemoteViews(ctx.packageName, R.layout.item_card)
+        }
     }
 
     private fun fillCard(rv: RemoteViews, t: JSONObject) {
@@ -65,6 +75,7 @@ class StackFactory(private val ctx: Context, private val kind: String) : RemoteV
 
     override fun getLoadingView(): RemoteViews =
         RemoteViews(ctx.packageName, R.layout.item_card).apply { setTextViewText(R.id.c_text, "...") }
+
     override fun getViewTypeCount(): Int = 1
     override fun getItemId(pos: Int): Long = pos.toLong()
     override fun hasStableIds(): Boolean = false
